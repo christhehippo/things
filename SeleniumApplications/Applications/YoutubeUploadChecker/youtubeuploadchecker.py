@@ -19,6 +19,7 @@ if len(sys.argv) > 1:
 else:
     user = input('Enter channel name: ')
     channelurl += user
+channelurl += '/videos'
 
 print('Checking last upload of ' + "\"" + user + "\"")
 # Attempt to open the channel url
@@ -29,9 +30,20 @@ except Exception as e:
 
 #Check if the channel exists
 if (driver.title == '404 Not Found'):
-    print('Channel does not exist!')
-    driver.close()
-    quit()
+    # Youtube has some weird stuff going on with their url formats, try this one second '*\c\*user*
+    channelurl = 'https://www.youtube.com/c/'
+    channelurl += user
+    channelurl += '/videos/'
+    
+    try:
+        driver.get(channelurl)
+    except Exception as e:
+        print(e)
+
+    if (driver.title == '404 Not Found'):
+        print('Channel does not exist!')
+        driver.close()
+        quit()
 
 # Get the page source to scan through
 src = driver.page_source
@@ -60,7 +72,7 @@ if (('by ' + user)  in src):
     rstr = rstr[1:]
     
     print()
-    print(user + " last uploaded video:")
+    print(user + " last uploaded video:", )
     print(lstr + rstr)
 else:
     print('User has no uploads!')
